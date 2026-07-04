@@ -9,5 +9,5 @@ python-dotenv
 requests
 Pillow
 numpy
-tensorflow
+tensorflow-cpu==2.16.1
 pydantic[email]
