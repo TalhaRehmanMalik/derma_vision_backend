@@ -1,0 +1,20 @@
+{
+  "idx_to_class": {
+    "0": "Actinic Keratosis",
+    "1": "Basal Cell Carcinoma",
+    "2": "Melanocytic Nevi",
+    "3": "Melanoma"
+  },
+  "class_to_idx": {
+    "Actinic Keratosis": 0,
+    "Basal Cell Carcinoma": 1,
+    "Melanocytic Nevi": 2,
+    "Melanoma": 3
+  },
+  "class_names": [
+    "Actinic Keratosis",
+    "Basal Cell Carcinoma",
+    "Melanocytic Nevi",
+    "Melanoma"
+  ]
+}

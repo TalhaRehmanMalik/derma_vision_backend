@@ -1,0 +1,8 @@
+
+venv/
+__pycache__/
+*.pyc
+.env
+uploads/
+ml_models/derma_vision_mobilenetv2.h5
+*.h5

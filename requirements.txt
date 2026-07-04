@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+sqlalchemy
+pymysql
+python-jose[cryptography]
+bcrypt==4.1.3
+python-multipart
+python-dotenv
+requests
+Pillow
+numpy
+tensorflow
+pydantic[email]
