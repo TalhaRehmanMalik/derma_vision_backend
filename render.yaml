@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: derma-vision-backend
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DB_HOST
+        value: bswjo9ak9oakldeshcph-mysql.services.clever-cloud.com
+      - key: DB_PORT
+        value: 3306
+      - key: DB_USER
+        value: ueshfoaszcnxofib
+      - key: DB_PASSWORD
+        value: tA8e30AgGFfMhaucGgF6
+      - key: DB_NAME
+        value: bswjo9ak9oakldeshcph
+      - key: JWT_SECRET
+        value: derma_vision_jwt_secret_key_2025
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: JWT_EXPIRE_HOURS
+        value: 24
+      - key: GROQ_API_KEY
+        value: your_groq_api_key_here
+      - key: UPLOAD_FOLDER
+        value: uploads
+      - key: LOG_LEVEL
+        value: INFO
