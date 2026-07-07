@@ -37,7 +37,11 @@ from utils.inference import load_model
 # MODEL_PATH   = os.path.join("ml_models", "derma_vision_mobilenetv2.h5")
 # MODEL_PATH = os.path.join("ml_models", "derma_vision_model.keras")
 
-MODEL_PATH = os.path.join("ml_models", "derma_vision_model_fixed.keras")
+# MODEL_PATH = os.path.join("ml_models", "derma_vision_model_fixed.keras")
+# MAPPING_PATH = os.path.join("ml_models", "class_mapping.json")
+
+
+MODEL_PATH   = os.path.join("ml_models", "model_weights.weights.h5")
 MAPPING_PATH = os.path.join("ml_models", "class_mapping.json")
 load_model(MODEL_PATH, MAPPING_PATH)
 

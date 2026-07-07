@@ -49,29 +49,34 @@ def load_model(model_path: str, mapping_path: str):
     global _model, _mapping, _class_names
 
     if not os.path.exists(model_path):
-        logger.warning(f"Model file not found at '{model_path}'")
+        logger.warning(f"Weights file not found at '{model_path}'")
         return
 
     import tensorflow as tf
-    
-    # Fix: custom_objects se quantization_config ignore karo
-    class FixedDense(tf.keras.layers.Dense):
-        def __init__(self, *args, **kwargs):
-            kwargs.pop('quantization_config', None)  # remove incompatible key
-            super().__init__(*args, **kwargs)
+    from tensorflow.keras import layers, Model
+    from tensorflow.keras.applications import MobileNetV2
 
-    _model = tf.keras.models.load_model(
-        model_path,
-        custom_objects={'Dense': FixedDense}
-    )
+    # Build fresh architecture — no config loading, no version issues
+    base    = MobileNetV2(input_shape=(224,224,3), include_top=False, weights=None)
+    inputs  = tf.keras.Input(shape=(224,224,3))
+    x       = base(inputs, training=False)
+    x       = layers.GlobalAveragePooling2D()(x)
+    x       = layers.BatchNormalization()(x)
+    x       = layers.Dense(256, activation="relu")(x)
+    x       = layers.Dropout(0.4)(x)
+    x       = layers.Dense(128, activation="relu")(x)
+    x       = layers.Dropout(0.3)(x)
+    outputs = layers.Dense(4, activation="softmax")(x)
+    _model  = Model(inputs, outputs)
+
+    # Load only weights — no config, no version conflict
+    _model.load_weights(model_path)
 
     with open(mapping_path, "r") as f:
         _mapping = json.load(f)
 
     _class_names = _mapping["class_names"]
-    logger.info(f"Model loaded. Classes: {_class_names}")
-
-
+    logger.info(f"Model loaded via weights. Classes: {_class_names}")
 
 
 
