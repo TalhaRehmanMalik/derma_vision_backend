@@ -31,7 +31,8 @@ def load_model(model_path: str, mapping_path: str):
     global _model, _mapping, _class_names
 
     if not os.path.exists(model_path):
-        logger.warning(f"Model file not found at '{model_path}' — place .h5 in ml_models/")
+        # logger.warning(f"Model file not found at '{model_path}' — place .h5 in ml_models/")
+        logger.warning(f"Model file not found at '{model_path}' — place .keras file in ml_models/")
         return
 
     # TF import is slow — kept here so it does not delay startup when model is absent
@@ -84,7 +85,8 @@ def predict(image_path: str) -> dict:
     """
     if _model is None:
         raise RuntimeError(
-            "Model not loaded. Place derma_vision_mobilenetv2.h5 in ml_models/ and restart."
+            # "Model not loaded. Place derma_vision_mobilenetv2.h5 in ml_models/ and restart."
+            "Model not loaded. Place derma_vision_model.keras in ml_models/ and restart."
         )
 
     tensor = preprocess(image_path)

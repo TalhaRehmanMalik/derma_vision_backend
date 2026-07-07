@@ -34,7 +34,8 @@ logger.info("All tables created/verified.")
 # ── ML model — loaded once at startup, reused for every request
 from utils.inference import load_model
 
-MODEL_PATH   = os.path.join("ml_models", "derma_vision_mobilenetv2.h5")
+# MODEL_PATH   = os.path.join("ml_models", "derma_vision_mobilenetv2.h5")
+MODEL_PATH = os.path.join("ml_models", "derma_vision_model.keras")
 MAPPING_PATH = os.path.join("ml_models", "class_mapping.json")
 load_model(MODEL_PATH, MAPPING_PATH)
 
