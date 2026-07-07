@@ -35,7 +35,19 @@ def create_database_if_not_exists():
 
 # Main engine — connected to derma_vision database
 DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-engine       = create_engine(DATABASE_URL, echo=False)
+
+# engine       = create_engine(DATABASE_URL, echo=False)
+engine = create_engine(
+    DATABASE_URL, 
+    echo=False,
+    pool_pre_ping=True,    
+    pool_recycle=280,      
+    pool_size=5,           
+    max_overflow=10        
+)
+
+
+
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
 
