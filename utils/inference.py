@@ -86,7 +86,9 @@ def predict(image_path: str) -> dict:
     if _model is None:
         raise RuntimeError(
             # "Model not loaded. Place derma_vision_mobilenetv2.h5 in ml_models/ and restart."
-            "Model not loaded. Place derma_vision_model.keras in ml_models/ and restart."
+            # "Model not loaded. Place derma_vision_model.keras in ml_models/ and restart."
+
+            "Model not loaded. Place derma_vision_model_fixed.keras in ml_models/ and restart."
         )
 
     tensor = preprocess(image_path)
