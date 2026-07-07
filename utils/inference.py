@@ -22,28 +22,57 @@ CONFIDENCE_THRESHOLD = 0.60          # below this → result marked inconclusive
 ALLOWED_EXTENSIONS   = {"jpg", "jpeg", "png"}
 
 
+# def load_model(model_path: str, mapping_path: str):
+#     """
+#     Called once in main.py at startup.
+#     Loads the Keras .h5 model and the class-name mapping JSON.
+#     If the model file is missing the server still starts — predict() will raise RuntimeError.
+#     """
+#     global _model, _mapping, _class_names
+
+#     if not os.path.exists(model_path):
+#         # logger.warning(f"Model file not found at '{model_path}' — place .h5 in ml_models/")
+#         logger.warning(f"Model file not found at '{model_path}' — place .keras file in ml_models/")
+#         return
+
+#     # TF import is slow — kept here so it does not delay startup when model is absent
+#     import tensorflow as tf
+#     _model = tf.keras.models.load_model(model_path)
+
+#     with open(mapping_path, "r") as f:
+#         _mapping = json.load(f)
+
+#     _class_names = _mapping["class_names"]
+#     logger.info(f"Model loaded. Classes: {_class_names}")
+
 def load_model(model_path: str, mapping_path: str):
-    """
-    Called once in main.py at startup.
-    Loads the Keras .h5 model and the class-name mapping JSON.
-    If the model file is missing the server still starts — predict() will raise RuntimeError.
-    """
     global _model, _mapping, _class_names
 
     if not os.path.exists(model_path):
-        # logger.warning(f"Model file not found at '{model_path}' — place .h5 in ml_models/")
-        logger.warning(f"Model file not found at '{model_path}' — place .keras file in ml_models/")
+        logger.warning(f"Model file not found at '{model_path}'")
         return
 
-    # TF import is slow — kept here so it does not delay startup when model is absent
     import tensorflow as tf
-    _model = tf.keras.models.load_model(model_path)
+    
+    # Fix: custom_objects se quantization_config ignore karo
+    class FixedDense(tf.keras.layers.Dense):
+        def __init__(self, *args, **kwargs):
+            kwargs.pop('quantization_config', None)  # remove incompatible key
+            super().__init__(*args, **kwargs)
+
+    _model = tf.keras.models.load_model(
+        model_path,
+        custom_objects={'Dense': FixedDense}
+    )
 
     with open(mapping_path, "r") as f:
         _mapping = json.load(f)
 
     _class_names = _mapping["class_names"]
     logger.info(f"Model loaded. Classes: {_class_names}")
+
+
+
 
 
 def allowed_file(filename: str) -> bool:
