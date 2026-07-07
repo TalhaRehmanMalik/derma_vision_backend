@@ -1,3 +1,28 @@
+# name: Sync to Hugging Face Spaces
+
+# on:
+#   push:
+#     branches: [main]
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
+#         with:
+#           fetch-depth: 0
+#           lfs: true
+
+#       - name: Push to HF
+#         env:
+#           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+#         run: git push --force https://talharehman125:$HF_TOKEN@huggingface.co/spaces/talharehman125/derma-vision-backend main
+
+
+
+
+
 name: Sync to Hugging Face Spaces
 
 on:
@@ -17,4 +42,15 @@ jobs:
       - name: Push to HF
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: git push --force https://talharehman125:$HF_TOKEN@huggingface.co/spaces/talharehman125/derma-vision-backend main
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          
+          git clone https://talharehman125:$HF_TOKEN@huggingface.co/spaces/talharehman125/derma-vision-backend hf_repo
+          
+          rsync -av --exclude='ml_models/' --exclude='.git/' --exclude='venv/' . hf_repo/
+          
+          cd hf_repo
+          git add .
+          git diff --staged --quiet || git commit -m "Sync from GitHub $(date)"
+          git push https://talharehman125:$HF_TOKEN@huggingface.co/spaces/talharehman125/derma-vision-backend main
