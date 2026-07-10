@@ -84,6 +84,7 @@ import string
 from datetime import datetime, timedelta, timezone
 
 import resend
+from dotenv import load_dotenv
 from utils.logger import get_logger
 
 load_dotenv()
@@ -100,7 +101,7 @@ def otp_expiry(minutes: int = 10) -> datetime:
 
 def send_otp_email(recipient: str, otp: str) -> bool:
     api_key = os.getenv("RESEND_API_KEY", "")
-    
+
     if not api_key:
         logger.info(f"[DEV MODE] OTP for {recipient}: {otp}")
         return True
