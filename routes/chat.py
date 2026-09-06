@@ -18,7 +18,7 @@ logger = get_logger("routes.chat")
 router = APIRouter(prefix="/api", tags=["Chat"])
 
 GROQ_URL   = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL = "llama-3.3-70b-versatile"
+GROQ_MODEL = "openai/gpt-oss-20b"
 
 # System prompt locks the bot to dermatology only
 SYSTEM_PROMPT = """You are DermaBot, an AI assistant for Derma Vision — a skin cancer screening app.
