@@ -29,7 +29,7 @@ derma_vision_backend/
 ├── utils/
 │   ├── logger.py                  ← Central logger
 │   ├── auth.py                    ← JWT create/verify + admin guard
-│   ├── email.py                   ← Gmail SMTP OTP sender
+│   ├── email.py                   ← Brevo API OTP sender
 │   └── inference.py               ← MobileNetV2 model load + predict
 │
 ├── ml_models/
@@ -87,3 +87,15 @@ derma_vision_backend/
 - TensorFlow / Keras
 - JWT Authentication + Bcrypt
 - Groq Llama-3 Chatbot
+
+## OTP email configuration
+
+Verify a sender email in Brevo, then set these variables in `.env` or Hugging Face Secrets:
+
+```env
+BREVO_API_KEY=your_brevo_api_key
+BREVO_SENDER_EMAIL=your_verified_sender@example.com
+BREVO_SENDER_NAME=Derma Vision
+```
+
+The Hugging Face API token is separate from Brevo and should use the variable name expected by the Hugging Face integration.

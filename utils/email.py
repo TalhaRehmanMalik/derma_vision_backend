@@ -75,15 +75,15 @@
 
 """
 utils/email.py
-OTP email sender using Resend API.
-Resend uses HTTP API — works on HuggingFace (SMTP is blocked).
+OTP email sender using the Brevo HTTP API.
+The HTTP API works on Hugging Face where SMTP may be blocked.
 """
 import os
 import random
 import string
 from datetime import datetime, timedelta, timezone
 
-import resend
+import requests
 from dotenv import load_dotenv
 from utils.logger import get_logger
 
@@ -100,38 +100,54 @@ def otp_expiry(minutes: int = 10) -> datetime:
 
 
 def send_otp_email(recipient: str, otp: str) -> bool:
-    api_key = os.getenv("RESEND_API_KEY", "")
+    api_key = os.getenv("BREVO_API_KEY", "")
+    sender_email = os.getenv("BREVO_SENDER_EMAIL", "")
+    sender_name = os.getenv("BREVO_SENDER_NAME", "Derma Vision")
 
     if not api_key:
         logger.info(f"[DEV MODE] OTP for {recipient}: {otp}")
         return True
 
-    resend.api_key = api_key
+    if not sender_email:
+        logger.error("BREVO_SENDER_EMAIL is not configured")
+        return False
+
+    body = f"""
+    <div style="font-family: Arial; max-width: 480px; margin: auto;
+                border: 1px solid #eee; border-radius: 8px; padding: 32px;">
+        <h2 style="color: #1A5276;">Derma Vision</h2>
+        <p>Your verification code is:</p>
+        <div style="background: #EAF2F8; border-radius: 8px; padding: 16px;
+                    text-align: center; margin: 20px 0;">
+            <span style="font-size: 36px; font-weight: bold;
+                         letter-spacing: 12px; color: #1A5276;">{otp}</span>
+        </div>
+        <p>This code expires in <strong>10 minutes</strong>.</p>
+        <p style="color: #999; font-size: 12px;">
+            If you did not request this, please ignore this email.
+        </p>
+    </div>
+    """
 
     try:
-        resend.Emails.send({
-            "from": "Derma Vision <onboarding@resend.dev>",
-            "to": [recipient],
-            "subject": "Derma Vision — Email Verification Code",
-            "html": f"""
-            <div style="font-family: Arial; max-width: 480px; margin: auto;
-                        border: 1px solid #eee; border-radius: 8px; padding: 32px;">
-                <h2 style="color: #1A5276;">Derma Vision</h2>
-                <p>Your verification code is:</p>
-                <div style="background: #EAF2F8; border-radius: 8px; padding: 16px;
-                            text-align: center; margin: 20px 0;">
-                    <span style="font-size: 36px; font-weight: bold;
-                                 letter-spacing: 12px; color: #1A5276;">{otp}</span>
-                </div>
-                <p>This code expires in <strong>10 minutes</strong>.</p>
-                <p style="color: #999; font-size: 12px;">
-                    If you did not request this, please ignore this email.
-                </p>
-            </div>
-            """
-        })
+        response = requests.post(
+            "https://api.brevo.com/v3/smtp/email",
+            headers={
+                "accept": "application/json",
+                "api-key": api_key,
+                "content-type": "application/json",
+            },
+            json={
+                "sender": {"name": sender_name, "email": sender_email},
+                "to": [{"email": recipient}],
+                "subject": "Derma Vision - Email Verification Code",
+                "htmlContent": body,
+            },
+            timeout=15,
+        )
+        response.raise_for_status()
         logger.info(f"OTP sent to {recipient}")
         return True
     except Exception as e:
-        logger.error(f"Resend email failed: {e}")
+        logger.error(f"Brevo email failed: {e}")
         return False
