@@ -71,7 +71,10 @@ def register(body: RegisterRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
 
-    send_otp_email(body.email, otp)
+    logger.info(f"Attempting registration OTP delivery for {body.email}")
+    if not send_otp_email(body.email, otp):
+        logger.error(f"Could not send registration OTP to {body.email}")
+        raise HTTPException(503, "Unable to send OTP email. Check Brevo configuration.")
     logger.info(f"New user registered: {body.username} ({body.email})")
 
     return {

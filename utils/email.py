@@ -104,9 +104,14 @@ def send_otp_email(recipient: str, otp: str) -> bool:
     sender_email = os.getenv("BREVO_SENDER_EMAIL", "")
     sender_name = os.getenv("BREVO_SENDER_NAME", "Derma Vision")
 
+    logger.info(
+        f"Preparing OTP email: recipient={recipient}, "
+        f"brevo_key_configured={bool(api_key)}, sender_configured={bool(sender_email)}"
+    )
+
     if not api_key:
-        logger.info(f"[DEV MODE] OTP for {recipient}: {otp}")
-        return True
+        logger.error("BREVO_API_KEY is not configured")
+        return False
 
     if not sender_email:
         logger.error("BREVO_SENDER_EMAIL is not configured")
@@ -130,6 +135,7 @@ def send_otp_email(recipient: str, otp: str) -> bool:
     """
 
     try:
+        logger.info("Sending OTP request to Brevo API")
         response = requests.post(
             "https://api.brevo.com/v3/smtp/email",
             headers={
@@ -146,8 +152,15 @@ def send_otp_email(recipient: str, otp: str) -> bool:
             timeout=15,
         )
         response.raise_for_status()
-        logger.info(f"OTP sent to {recipient}")
+        logger.info(f"Brevo accepted OTP email for {recipient}")
         return True
+    except requests.HTTPError as e:
+        details = e.response.text[:500] if e.response is not None else str(e)
+        logger.error(f"Brevo email failed ({e.response.status_code}): {details}")
+        return False
+    except requests.RequestException as e:
+        logger.error(f"Brevo network request failed: {e}")
+        return False
     except Exception as e:
-        logger.error(f"Brevo email failed: {e}")
+        logger.error(f"Brevo email failed unexpectedly: {e}")
         return False
