@@ -18,8 +18,8 @@ _model       = None
 _mapping     = None
 _class_names = None
 
-CONFIDENCE_THRESHOLD = 0.45
-ENTROPY_THRESHOLD    = 0.70
+CONFIDENCE_THRESHOLD = 0.50
+ENTROPY_THRESHOLD    = 0.65
 ALLOWED_EXTENSIONS   = {"jpg", "jpeg", "png"}
 
 
@@ -134,7 +134,9 @@ def predict(image_path: str) -> dict:
     max_conf = float(np.max(probs))
     predicted_class_idx = int(np.argmax(probs))
 
-    if entropy_ratio > ENTROPY_THRESHOLD and max_conf < CONFIDENCE_THRESHOLD:
+    if max_conf < 0.40 or (
+        max_conf < CONFIDENCE_THRESHOLD and entropy_ratio > ENTROPY_THRESHOLD
+    ):
         return {
             "status": "rejected",
             "predicted_class": "Unknown / Out of Scope",
