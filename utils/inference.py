@@ -6,6 +6,7 @@ TensorFlow is imported lazily (inside load_model) to keep startup fast if model 
 import os
 import json
 import uuid
+import cv2
 import numpy as np
 from PIL import Image
 
@@ -19,7 +20,7 @@ _mapping     = None
 _class_names = None
 
 CONFIDENCE_THRESHOLD = 0.45
-ENTROPY_THRESHOLD    = 0.70
+ENTROPY_THRESHOLD    = 0.65
 ALLOWED_EXTENSIONS   = {"jpg", "jpeg", "png"}
 
 
@@ -86,6 +87,16 @@ def allowed_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def is_valid_skin_image(img: np.ndarray) -> bool:
+    """Return True when at least 15% of the image matches broad skin tones."""
+    hsv = cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2HSV)
+    lower_skin = np.array([0, 20, 50], dtype=np.uint8)
+    upper_skin = np.array([35, 255, 255], dtype=np.uint8)
+    skin_mask = cv2.inRange(hsv, lower_skin, upper_skin)
+    skin_ratio = np.count_nonzero(skin_mask) / skin_mask.size
+    return bool(skin_ratio >= 0.15)
+
+
 def save_image(file_bytes: bytes, original_filename: str, upload_folder: str) -> str:
     """
     Save raw bytes to disk under a UUID-based filename.
@@ -118,6 +129,15 @@ def predict(image_path: str) -> dict:
     Returns predicted class, confidence, all class probabilities, and inconclusive flag.
     Raises RuntimeError if model was not loaded.
     """
+    image = np.asarray(Image.open(image_path).convert("RGB"))
+    if not is_valid_skin_image(image):
+        return {
+            "status": "rejected",
+            "predicted_class": "Invalid Input",
+            "message": "Image does not contain valid skin region (Out of Scope).",
+            "inconclusive": True,
+        }
+
     if _model is None:
         raise RuntimeError(
             # "Model not loaded. Place derma_vision_mobilenetv2.h5 in ml_models/ and restart."
