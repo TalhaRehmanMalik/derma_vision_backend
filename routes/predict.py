@@ -52,6 +52,10 @@ async def predict_image(
         logger.error(f"Inference failed: {e}")
         raise HTTPException(503, str(e))
 
+    if result.get("ood_detected"):
+        os.remove(image_path)
+        return result
+
     # Pick disclaimer based on confidence level
     disclaimer = (
         "Confidence is below threshold. Result is inconclusive — "

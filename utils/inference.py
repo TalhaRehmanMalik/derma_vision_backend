@@ -18,7 +18,8 @@ _model       = None
 _mapping     = None
 _class_names = None
 
-CONFIDENCE_THRESHOLD = 0.60          # below this → result marked inconclusive
+CONFIDENCE_THRESHOLD = 0.65
+ENTROPY_THRESHOLD    = 0.45
 ALLOWED_EXTENSIONS   = {"jpg", "jpeg", "png"}
 
 
@@ -126,20 +127,34 @@ def predict(image_path: str) -> dict:
         )
 
     tensor = preprocess(image_path)
-    probs  = _model.predict(tensor, verbose=0)[0]   # shape: (num_classes,)
-    idx    = int(np.argmax(probs))
-    conf   = float(probs[idx])
+    probs = np.asarray(_model.predict(tensor, verbose=0)[0], dtype=np.float32)
+    entropy = -np.sum(probs * np.log(probs + 1e-8))
+    max_entropy = np.log(4)
+    entropy_ratio = entropy / max_entropy
+    max_conf = float(np.max(probs))
+    predicted_class_idx = int(np.argmax(probs))
+
+    if entropy_ratio > ENTROPY_THRESHOLD or max_conf < CONFIDENCE_THRESHOLD:
+        return {
+            "status": "rejected",
+            "predicted_class": "Unknown / Out of Scope",
+            "confidence": round(max_conf, 4),
+            "entropy_ratio": round(float(entropy_ratio), 4),
+            "inconclusive": True,
+            "ood_detected": True,
+            "message": "The provided image does not match the trained 4 skin lesion classes."
+        }
 
     all_probs = {
-        _class_names[i]: round(float(probs[i]), 4)
+        str(_class_names[i]): round(float(probs[i]), 4)
         for i in range(len(_class_names))
     }
 
-    logger.info(f"Prediction: {_class_names[idx]} | confidence: {conf:.2%}")
+    logger.info(f"Prediction: {_class_names[predicted_class_idx]} | confidence: {max_conf:.2%}")
 
     return {
-        "predicted_class":   _class_names[idx],
-        "confidence":        round(conf, 4),
+        "predicted_class":   str(_class_names[predicted_class_idx]),
+        "confidence":        round(max_conf, 4),
         "all_probabilities": all_probs,
-        "inconclusive":      conf < CONFIDENCE_THRESHOLD,
+        "inconclusive":      False,
     }
