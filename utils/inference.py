@@ -88,13 +88,13 @@ def allowed_file(filename: str) -> bool:
 
 
 def is_valid_skin_image(img: np.ndarray) -> bool:
-    """Return True when at least 15% of the image matches broad skin tones."""
+    """Return True when at least 5% of the image matches broad skin tones."""
     hsv = cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2HSV)
-    lower_skin = np.array([0, 20, 50], dtype=np.uint8)
+    lower_skin = np.array([0, 10, 40], dtype=np.uint8)
     upper_skin = np.array([35, 255, 255], dtype=np.uint8)
     skin_mask = cv2.inRange(hsv, lower_skin, upper_skin)
     skin_ratio = np.count_nonzero(skin_mask) / skin_mask.size
-    return bool(skin_ratio >= 0.15)
+    return bool(skin_ratio >= 0.05)
 
 
 def save_image(file_bytes: bytes, original_filename: str, upload_folder: str) -> str:
