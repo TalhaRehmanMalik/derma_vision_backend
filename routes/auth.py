@@ -54,8 +54,7 @@ def register(body: RegisterRequest, db: Session = Depends(get_db)):
         raise HTTPException(400, "Password must be at least 8 characters")
     if db.query(User).filter_by(email=body.email).first():
         raise HTTPException(409, "Email already registered")
-    if db.query(User).filter_by(username=body.username).first():
-        raise HTTPException(409, "Username already taken")
+    
 
     hashed = hashpw(body.password.encode(), gensalt()).decode()
     otp    = generate_otp()
