@@ -59,3 +59,28 @@ class Scan(Base):
             "all_probabilities": json.loads(self.all_probabilities) if self.all_probabilities else {},
             "timestamp":        self.timestamp.isoformat() if self.timestamp else None,
         }
+
+
+
+
+
+class Dermatologist(Base):
+    __tablename__ = "dermatologists"
+
+    id           = Column(Integer, primary_key=True, autoincrement=True)
+    name         = Column(String(100), nullable=False)
+    specialty    = Column(String(150), nullable=False)
+    hospital     = Column(String(150), nullable=False)
+    phone        = Column(String(20),  nullable=False)
+    availability = Column(String(100), nullable=False)
+    is_active    = Column(Boolean, default=True)
+
+    def to_dict(self):
+        return {
+            "id":           self.id,
+            "name":         self.name,
+            "specialty":    self.specialty,
+            "hospital":     self.hospital,
+            "phone":        self.phone,
+            "availability": self.availability,
+        }

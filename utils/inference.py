@@ -350,7 +350,7 @@ def predict(image_path: str) -> dict:
 
     tensor = _preprocess(image_path)
 
-# ── Stage 1: Skin check ───────────────────────────────────
+#  Stage 1: Skin check 
     if _skin_model is not None:
         skin_prob = float(_skin_model.predict(tensor, verbose=0)[0][0])
         logger.info(f"Skin probability: {skin_prob:.4f}")
