@@ -350,7 +350,7 @@ def predict(image_path: str) -> dict:
 
     tensor = _preprocess(image_path)
 
-    # ── Stage 1: Skin check ───────────────────────────────────
+# ── Stage 1: Skin check ───────────────────────────────────
     if _skin_model is not None:
         skin_prob = float(_skin_model.predict(tensor, verbose=0)[0][0])
         logger.info(f"Skin probability: {skin_prob:.4f}")
@@ -358,8 +358,8 @@ def predict(image_path: str) -> dict:
         if skin_prob < SKIN_THRESHOLD:
             logger.warning(f"Non-skin image rejected — skin_prob={skin_prob:.4f}")
             return {
-                "predicted_class":   "Invalid Input",
-                "confidence":        round(skin_prob, 4),
+                "predicted_class":   "Non-Skin Image",
+                "confidence":        0.0,
                 "all_probabilities": {},
                 "inconclusive":      True,
                 "non_skin":          True,
