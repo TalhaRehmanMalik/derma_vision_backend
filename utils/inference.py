@@ -297,9 +297,6 @@ def load_skin_classifier(skin_model_path: str) -> None:
         inputs_s  = tf.keras.Input(shape=(224, 224, 3))
         x_s       = base_s(inputs_s, training=False)
         x_s       = layers.GlobalAveragePooling2D()(x_s)
-        x_s       = layers.BatchNormalization()(x_s)
-        x_s       = layers.Dense(256, activation="relu")(x_s)
-        x_s       = layers.Dropout(0.4)(x_s)
         x_s       = layers.Dense(128, activation="relu")(x_s)
         x_s       = layers.Dropout(0.3)(x_s)
         outputs_s = layers.Dense(1, activation="sigmoid")(x_s)
@@ -309,8 +306,7 @@ def load_skin_classifier(skin_model_path: str) -> None:
         logger.info("Skin classifier loaded successfully.")
     except Exception as e:
         logger.error(f"Failed to load skin classifier weights: {e}")
-
-
+        
 def allowed_file(filename: str) -> bool:
     return (
         "." in filename
